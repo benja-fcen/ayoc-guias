@@ -1,4 +1,3 @@
-
 #include "funca.h"
 #include "funcb.h"
 
