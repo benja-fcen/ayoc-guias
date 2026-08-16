@@ -6,15 +6,15 @@ typedef struct {
     int vida;
     double ataque;
     double defensa;
-} mounstruo_t;
+} monstruo_t;
 
 int main() {
-    mounstruo_t monstruos[3] = {
+    monstruo_t monstruos[3] = {
         {"Goblin", 10, 1.0, 0.0},
         {"Ogro", 25, 12, 2.5},
         {"Zombi", 15, 2.0, 1.5}};
     for(int i = 0; i < 3; i++) {
-        printf("Mounstruo #%d: %s\n"
+        printf("Monstruo #%d: %s\n"
         "Vida: %d\n"
         "Ataque: %.2lf\n"
         "Defensa: %.2lf\n",
