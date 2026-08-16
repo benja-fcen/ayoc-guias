@@ -9,7 +9,7 @@ typedef struct {
 } mounstruo_t;
 
 int main() {
-    mounstruo_t mounstruos[3] = {
+    mounstruo_t monstruos[3] = {
         {"Goblin", 10, 1.0, 0.0},
         {"Ogro", 25, 12, 2.5},
         {"Zombi", 15, 2.0, 1.5}};
@@ -18,10 +18,10 @@ int main() {
         "Vida: %d\n"
         "Ataque: %.2lf\n"
         "Defensa: %.2lf\n",
-        i + 1, mounstruos[i].nombre,
-        mounstruos[i].vida,
-        mounstruos[i].ataque,
-        mounstruos[i].defensa);
+        i + 1, monstruos[i].nombre,
+        monstruos[i].vida,
+        monstruos[i].ataque,
+        monstruos[i].defensa);
     }
     return 0;
 }
