@@ -12,7 +12,7 @@ TARGET = $(patsubst %,$(OUTDIR)/%,$(_TARGET))
 all: makedirs $(TARGET)
 
 run:
-	$(OUTDIR)/$(_TARGET)
+	@$(OUTDIR)/$(_TARGET)
 
 makedirs:
 	mkdir -p $(OBJDIR)
