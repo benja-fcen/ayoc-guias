@@ -14,6 +14,9 @@ all: $(TARGET)
 run: $(TARGET)
 	@$(OUTDIR)/$(_TARGET)
 
+valgrind: $(TARGET)
+	valgrind $(OUTDIR)/$(_TARGET)
+
 $(_TARGET): % : $(OUTDIR)/%
 
 makedirs:
