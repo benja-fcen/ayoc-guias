@@ -36,5 +36,6 @@ int main() {
     imprimir_persona(jp);
     imprimir_persona(jpjr);
     eliminarPersona(jp);
+    eliminarPersona(jpjr);
     return 0;
 }
