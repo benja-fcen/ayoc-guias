@@ -44,5 +44,6 @@ int main() {
     rm_fat32(f1);
     rm_fat32(f2);
     rm_fat32(f3);
+    rm_fat32(f4);
     return 0;
 }
