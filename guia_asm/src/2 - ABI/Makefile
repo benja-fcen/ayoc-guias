@@ -10,6 +10,9 @@ C_OBJS := ABI_c.o
 ASM_OBJS := ABI_asm.o ABI_c.o
 ABI_OBJS := ABI_abi.o abi_enforcer_regsave.o ABI_c.o
 
+runTester:
+	./tester
+
 tester: tester.o $(ASM_OBJS)
 	$(CC) $(CFLAGS) $^ -o $@
 
@@ -44,4 +47,4 @@ clean:
 	rm -f *.o
 	rm -f tester tester_c main main_c abi_enforcer_tester abi_enforcer_main
 
-.PHONY: ABI_abi.o
+.PHONY: ABI_abi.o runTester

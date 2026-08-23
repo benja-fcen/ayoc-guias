@@ -9,8 +9,9 @@
 
 int main() {
 	/* Acá pueden realizar sus propias pruebas */
-	assert(alternate_sum_4_using_c(8, 2, 5, 1) == 6);
+	//assert(alternate_sum_4_using_c(8, 2, 5, 1) == 6);
 
-	assert(alternate_sum_4_using_c_alternative(8, 2, 5, 1) == 6);
-	return 0;
+	//assert(alternate_sum_4_using_c_alternative(8, 2, 5, 1) == 6);
+    assert(alternate_sum_8(8,2,5,1,8,2,5,1) == 12);
+    return 0;
 }
