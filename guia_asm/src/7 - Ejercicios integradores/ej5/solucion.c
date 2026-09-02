@@ -38,7 +38,10 @@ bool EJERCICIO_3_HECHO = true;
  *   - Cualquier otro valor es `true`
  */
 bool hay_accion_que_toque(accion_t* accion, char* nombre) {
-	return false;
+  bool res = false;
+  for(accion_t* accion_actual = accion; !res && accion_actual != NULL; accion_actual = accion_actual->siguiente)
+    res = !strcmp(accion_actual->destino->nombre, nombre);
+  return res;
 }
 
 /**
@@ -63,6 +66,14 @@ bool hay_accion_que_toque(accion_t* accion, char* nombre) {
  * orden de ejecución.
  */
 void invocar_acciones(accion_t* accion, tablero_t* tablero) {
+  for(accion_t* accion_actual = accion; accion_actual; accion_actual = accion_actual->siguiente) {
+    carta_t *carta = accion_actual->destino;
+    if(carta->en_juego) {
+      accion_actual->invocar(tablero, carta);
+      if(carta->en_juego)
+        carta->en_juego = carta->vida > 0;
+    }
+  }
 }
 
 /**
@@ -84,4 +95,11 @@ void invocar_acciones(accion_t* accion, tablero_t* tablero) {
  */
 void contar_cartas(tablero_t* tablero, uint32_t* cant_rojas, uint32_t* cant_azules) {
 	*cant_rojas = *cant_azules = 0;
+  for(int i = 0; i < ALTO_CAMPO; i++)
+    for(int j = 0; j < ANCHO_CAMPO; j++)
+      if(tablero->campo[i][j]) {
+        uint8_t jugador = tablero->campo[i][j]->jugador;
+        *cant_rojas += jugador == JUGADOR_ROJO;
+        *cant_azules += jugador == JUGADOR_AZUL;
+      }
 }

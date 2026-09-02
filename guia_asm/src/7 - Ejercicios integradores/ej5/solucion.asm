@@ -19,22 +19,23 @@ NO_COMPLETADO EQU -1
 extern strcmp
 
 ;########### ESTOS SON LOS OFFSETS Y TAMAÑO DE LOS STRUCTS
+PTR_SIZE EQU 8
 ; Completar las definiciones (serán revisadas por ABI enforcer):
-carta.en_juego EQU NO_COMPLETADO
-carta.nombre   EQU NO_COMPLETADO
-carta.vida     EQU NO_COMPLETADO
-carta.jugador  EQU NO_COMPLETADO
-carta.SIZE     EQU NO_COMPLETADO
+carta.en_juego EQU 0
+carta.nombre   EQU 1
+carta.vida     EQU 14
+carta.jugador  EQU 16
+carta.SIZE     EQU 18
 
-tablero.mano_jugador_rojo EQU NO_COMPLETADO
-tablero.mano_jugador_azul EQU NO_COMPLETADO
-tablero.campo             EQU NO_COMPLETADO
-tablero.SIZE              EQU NO_COMPLETADO
+tablero.mano_jugador_rojo EQU 0
+tablero.mano_jugador_azul EQU 8
+tablero.campo             EQU 16
+tablero.SIZE              EQU 16 + PTR_SIZE * tablero.ANCHO * tablero.ALTO
 
-accion.invocar   EQU NO_COMPLETADO
-accion.destino   EQU NO_COMPLETADO
-accion.siguiente EQU NO_COMPLETADO
-accion.SIZE      EQU NO_COMPLETADO
+accion.invocar   EQU 0
+accion.destino   EQU 8
+accion.siguiente EQU 16
+accion.SIZE      EQU 24
 
 ; Variables globales de sólo lectura
 section .rodata
@@ -44,21 +45,21 @@ section .rodata
 ; Funciones a implementar:
 ;   - hay_accion_que_toque
 global EJERCICIO_1_HECHO
-EJERCICIO_1_HECHO: db FALSE
+EJERCICIO_1_HECHO: db TRUE
 
 ; Marca el ejercicio 2 como hecho (`true`) o pendiente (`false`).
 ;
 ; Funciones a implementar:
 ;   - invocar_acciones
 global EJERCICIO_2_HECHO
-EJERCICIO_2_HECHO: db FALSE
+EJERCICIO_2_HECHO: db TRUE
 
 ; Marca el ejercicio 3 como hecho (`true`) o pendiente (`false`).
 ;
 ; Funciones a implementar:
 ;   - contar_cartas
 global EJERCICIO_3_HECHO
-EJERCICIO_3_HECHO: db FALSE
+EJERCICIO_3_HECHO: db TRUE
 
 section .text
 
@@ -82,7 +83,31 @@ hay_accion_que_toque:
 	;
 	; r/m64 = accion_t*  accion
 	; r/m64 = char*      nombre
-	xor rax, rax
+	push rbp
+  mov rbp, rsp
+  sub rsp, 8
+  mov [rbp - 8], rsi ; nombre
+  push r12
+  mov r12, rdi  ; accion
+  mov eax, 1
+  jmp .c0
+  .f0:
+    mov rdi, [r12 + accion.destino] ; rdi = accion->destino
+    lea rdi, [rdi + carta.nombre]   ; rdi = accion->destino->nombre
+    mov rsi, [rbp - 8]              ; rsi = nombre
+    call strcmp
+    mov r12, [r12 + accion.siguiente]
+  .c0:
+    test eax, eax
+    setz al
+    jz .return
+    test r12, r12
+    jnz .f0
+  
+  .return:
+  pop r12
+  mov rsp, rbp
+  pop rbp
 	ret
 
 ; Invoca las acciones que fueron encoladas en la secuencia proporcionada en el
@@ -95,7 +120,7 @@ hay_accion_que_toque:
 ; se debe marcar ésta como fuera de juego.
 ;
 ; Las funciones que implementan acciones de juego tienen la siguiente firma:
-; ```c
+; ```cclr x86
 ; void mi_accion(tablero_t* tablero, carta_t* carta);
 ; ```
 ; - El tablero a utilizar es el pasado como parámetro
@@ -116,6 +141,37 @@ invocar_acciones:
 	;
 	; r/m64 = accion_t*  accion
 	; r/m64 = tablero_t* tablero
+  push rbp
+  mov rbp, rsp
+  sub rsp, 16
+  push r12
+  push r13
+  
+  mov [rbp - 8], rsi  ; tablero
+  mov r12, rdi        ; accion
+  jmp .c0
+  .f0:
+    mov r13, [r12 + accion.destino]     ; carta
+    cmp byte [r13 + carta.en_juego], 0  ; if(carta->en_juego) {
+    je .continue                        ;
+    mov rdi, [rbp - 8]                  ;   rdi = tablero
+    mov rsi, r13                        ;   rsi = carta
+    mov rdx, [r12 + accion.invocar]     ;   rdx = accion_actual->invocar
+    call rdx                            ;   accion_actual(tablero, carte)}
+    cmp byte [r13 + carta.en_juego], 0  ; if(carta->en_juego) {
+    je .continue
+    cmp word [r13 + carta.vida], 0      ; carta->en_juego = carta->vida > 0
+    seta [r13 + carta.en_juego]         ; }
+  .continue:                            ;
+    mov r12, [r12 + accion.siguiente]   ; accion_actual = accion_actual->siguiente
+  .c0:                                  ;
+    test r12, r12                       ;
+    jnz .f0
+
+  pop r13
+  pop r12
+  mov rsp, rbp
+  pop rbp
 	ret
 
 ; Cuenta la cantidad de cartas rojas y azules en el tablero.
@@ -146,4 +202,40 @@ contar_cartas:
 	; r/m64 = tablero_t* tablero
 	; r/m64 = uint32_t*  cant_rojas
 	; r/m64 = uint32_t*  cant_azules
+  push rbp
+  mov rbp, rsp
+  sub rsp, 8
+  push r12
+  push r13
+  push r14
+
+  mov dword [rsi], 0
+  mov dword [rdx], 0
+  mov r12, rsi                    ; cant_rojas
+  mov r13, rdx                    ; cant_azules
+  lea r14, [rdi + tablero.campo]  ; tablero->campo
+  mov ecx, tablero.ANCHO * tablero.ALTO
+  mov esi, 0
+  mov edx, 0
+
+  .f0:
+    mov rdi, [r14]                  ; rdi = campo[i][j]
+    test rdi, rdi                   ; if(tablero->campo[i][j]) {
+    jz .continue                    ;
+    mov dil, [rdi + carta.jugador]    ; dil = tablero->campo[i][j]->jugador
+      cmp dil, JUGADOR_ROJO
+      sete sil                        ; sil = jugador == JUGADOR_ROJO
+      cmp dil, JUGADOR_AZUL
+      sete dl                         ; dl = jugador == JUGADOR_AZUL
+      add [r12], esi                  ; *cant_rojas += jugador == JUGADOR_ROJO
+      add [r13], edx                  ; *cant_azules += jugador == JUGADOR_AZUL
+  .continue:
+    add r14, 8
+    loop .f0
+
+  pop r14
+  pop r13
+  pop r12
+  mov rsp, rbp
+  pop rbp
 	ret
