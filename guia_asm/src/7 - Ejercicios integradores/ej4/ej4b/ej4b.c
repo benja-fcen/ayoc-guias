@@ -6,7 +6,7 @@
 void invocar_habilidad(void* carta_generica, char* habilidad) {
 	card_t* carta = carta_generica;
   if(!carta) return;
-  if(carta->__dir_entries == 0) invocar_habilidad(carta->__archetype, habilidad);
+  if(carta->__dir_entries == 0) {invocar_habilidad(carta->__archetype, habilidad); return;}
   bool contieneHabilidad = false;
   int i = 0;
   do
