@@ -58,3 +58,4 @@ dkms.conf
 out/
 obj/
 /.vscode
+/guia_asm/src/test_utils/venv/lib/python3.12/site-packages/pycparser
