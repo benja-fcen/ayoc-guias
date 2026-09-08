@@ -38,7 +38,7 @@ global resolver_automaticamente
 
 ; rdi = caso
 ; rsi = categoria
-resolver_caso_por_categoria:
+se_puede_resolver_caso_por_categoria:
   push rbp
   mov rbp, rsp
   sub rsp, 16
@@ -70,7 +70,7 @@ resolver_caso_por_categoria:
 
 ; rdi = caso
 ; rsi = resultado_funcion
-resolver_caso_por_funcion:
+se_puede_resolver_caso_por_funcion:
   push rbp
   mov rbp, rsp
   
@@ -81,7 +81,7 @@ resolver_caso_por_funcion:
   jmp .return                           ;
   .resolver_por_categoria:              ; else
   mov rsi, rdi                          ; lea rsi, [rdi + CASO_CATEGORIA_OFFSET]
-  call resolver_caso_por_categoria      ; return resolver_caso_por_categoria(caso, caso->categoria)
+  call se_puede_resolver_caso_por_categoria      ; return resolver_caso_por_categoria(caso, caso->categoria)
 
   .return:
   mov rsp, rbp
@@ -91,7 +91,7 @@ resolver_caso_por_funcion:
 ; rdi = caso
 ; rsi = funcion
 ; edx = nivel
-resolver_caso_por_nivel:
+se_puede_resolver_caso_por_nivel:
   push rbp
   mov rbp, rsp
   
@@ -105,7 +105,7 @@ resolver_caso_por_nivel:
   call rsi                        ; ax = funcion(caso)
   mov rdi, [rbp - 8]              ; rdi = caso
   movzx rsi, ax                   ; rsi = funcion(caso)
-  call resolver_caso_por_funcion  ; resolver_caso_por_funcion(caso, funcion(caso))
+  call se_puede_resolver_caso_por_funcion  ; resolver_caso_por_funcion(caso, funcion(caso))
 
   .return:
   mov rsp, rbp
@@ -115,13 +115,13 @@ resolver_caso_por_nivel:
 
 ; rdi = caso
 ; rsi = funcion
-resolver_caso:
+se_puede_resolver_caso:
   push rbp
   mov rbp, rsp
 
   mov rdx, [rdi + CASO_USUARIO_OFFSET]  ; rdx = caso->usuario
   mov edx, [rdx + USUARIO_NIVEL_OFFSET] ; edx = usuario->nivel
-  call resolver_caso_por_nivel          ; resolver_caso_por_nivel(caso, funcion, nivel)
+  call se_puede_resolver_caso_por_nivel          ; resolver_caso_por_nivel(caso, funcion, nivel)
 
   mov rsp, rbp
   pop rbp
@@ -149,11 +149,11 @@ resolver_automaticamente:
     .l0:
       mov rdi, r12        ; rdi = &arreglo_casos[i]
       mov rsi, [rbp - 16] ; rsi = funcion
-      call resolver_caso
+      call se_puede_resolver_caso
       test al, al
-      jnz .continue
-      mov [r13], r12
-      add r13, CASO_SIZE
+      jnz .continue       ; if(!se_puede_resolver_caso(&arreglo_casos[i], funcion));
+      mov [r13], r12      ;   casos_a_revisar[j] = arreglo_casos[i];
+      add r13, CASO_SIZE  ;   j++;
     .continue:
       add r12, CASO_SIZE
       dec dword [rbp - 4]

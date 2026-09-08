@@ -57,3 +57,4 @@ dkms.conf
 # out
 out/
 obj/
+/.vscode

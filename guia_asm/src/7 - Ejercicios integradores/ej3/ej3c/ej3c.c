@@ -9,11 +9,11 @@ void contabilizar(estadisticas_t *res, uint16_t estado, const char* categoria) {
   }
   if(!strncmp(categoria, "CLT", 4))
     res->cantidad_CLT++;
-  if(!strncmp(categoria, "RBO", 4))
+  else if(!strncmp(categoria, "RBO", 4))
     res->cantidad_RBO++;
-  if(!strncmp(categoria, "KSC", 4))
+  else if(!strncmp(categoria, "KSC", 4))
     res->cantidad_KSC++;
-  if(!strncmp(categoria, "KDT", 4))
+  else if(!strncmp(categoria, "KDT", 4))
     res->cantidad_KDT++;
 }
 

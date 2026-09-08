@@ -463,10 +463,10 @@ Cada carta tiene un nombre, un dueño y una cantidad de puntos de vida.
 Una carta puede estar en el campo de juego pero no estar en juego aún (se encuentra desactivada temporalmente o nunca se activó).
 
 ```c
-typedef struct carta {
-	bool en_juego;
-	char nombre[12];
-	uint16_t vida;
+typedef struct carta {//   01234567
+	bool en_juego;    //  0 |ABBBBBBB| 7
+	char nombre[12];  //  8 |BBBBB-CC| 15
+	uint16_t vida;    //  16|D-|
 	uint8_t jugador;
 } carta_t;
 ```
@@ -511,21 +511,21 @@ Nos interesa implementar tres funciones.
 Completar los offets y tamaños de struct definidos en el archivo `solucion.asm`. 
 Para validar este ejercicio pueden correr `make check_offsets`.
 ```nasm
-carta.en_juego EQU NO_COMPLETADO
-carta.nombre   EQU NO_COMPLETADO
-carta.vida     EQU NO_COMPLETADO
-carta.jugador  EQU NO_COMPLETADO
-carta.SIZE     EQU NO_COMPLETADO
+carta.en_juego EQU 0
+carta.nombre   EQU 1
+carta.vida     EQU 14
+carta.jugador  EQU 16
+carta.SIZE     EQU 18
 
-tablero.mano_jugador_rojo EQU NO_COMPLETADO
-tablero.mano_jugador_azul EQU NO_COMPLETADO
-tablero.campo             EQU NO_COMPLETADO
-tablero.SIZE              EQU NO_COMPLETADO
+tablero.mano_jugador_rojo EQU 0
+tablero.mano_jugador_azul EQU 8
+tablero.campo             EQU 16
+tablero.SIZE              EQU 16 + PTR_SIZE * tablero.ALTO * tablero.ANCHO
 
-accion.invocar   EQU NO_COMPLETADO
-accion.destino   EQU NO_COMPLETADO
-accion.siguiente EQU NO_COMPLETADO
-accion.SIZE      EQU NO_COMPLETADO
+accion.invocar   EQU 0
+accion.destino   EQU 8
+accion.siguiente EQU 16
+accion.SIZE      EQU 24
 ```
 
 - Las definiciones con el prefijo `carta` corresponden a la estructura `carta_t`
