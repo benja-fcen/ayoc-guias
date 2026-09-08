@@ -1,2 +1,0 @@
-global_foo_label strncmp
-global_foo_label resolver_automaticamente
