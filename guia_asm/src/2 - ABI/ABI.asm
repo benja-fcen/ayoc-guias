@@ -39,9 +39,9 @@ alternate_sum_4:
 alternate_sum_4_using_c:
   ;prologo
   push RBP ;pila alineada
-  mov RBP, RSP ;strack frame armado
+  mov RBP, RSP  ;strack frame armado
   push R12
-  push R13	; preservo no volatiles, al ser 2 la pila queda alineada
+  push R13      ; preservo no volatiles, al ser 2 la pila queda alineada
 
   mov R12D, EDX ; guardo los parámetros x3 y x4 ya que están en registros volátiles
   mov R13D, ECX ; y tienen que sobrevivir al llamado a función
@@ -68,44 +68,44 @@ alternate_sum_4_using_c:
 
 alternate_sum_4_using_c_alternative:
   ;prologo
-  push RBP ;pila alineada
-  mov RBP, RSP ;strack frame armado
-  sub RSP, 16 ; muevo el tope de la pila 8 bytes para guardar x4, y 8 bytes para que quede alineada
+  push RBP          ;pila alineada
+  mov RBP, RSP      ;strack frame armado
+  sub RSP, 16       ; muevo el tope de la pila 8 bytes para guardar x4, y 8 bytes para que quede alineada
 
-  mov [RBP-8], RCX ; guardo x4 en la pila
+  mov [RBP-8], RCX  ; guardo x4 en la pila
 
-  push RDX  ;preservo x3 en la pila, desalineandola
-  sub RSP, 8 ;alineo
+  push RDX          ;preservo x3 en la pila, desalineandola
+  sub RSP, 8        ;alineo
   call restar_c 
-  add RSP, 8 ;restauro tope
-  pop RDX ;recupero x3
+  add RSP, 8        ;restauro tope
+  pop RDX           ;recupero x3
 
   mov EDI, EAX
   mov ESI, EDX
   call sumar_c
 
   mov EDI, EAX
-  mov ESI, [RBP - 8] ;leo x4 de la pila
+  mov ESI, [RBP - 8];leo x4 de la pila
   call restar_c
 
   ;el resultado final ya está en EAX, así que no hay que hacer más nada
 
   ;epilogo
-  add RSP, 16 ;restauro tope de pila
-  pop RBP ;pila desalineada, RBP restaurado, RSP apuntando a la dirección de retorno
+  add RSP, 16       ;restauro tope de pila
+  pop RBP           ;pila desalineada, RBP restaurado, RSP apuntando a la dirección de retorno
   ret
 
 
 ; uint32_t alternate_sum_8(uint32_t x1, uint32_t x2, uint32_t x3, uint32_t x4, uint32_t x5, uint32_t x6, uint32_t x7, uint32_t x8);
 ; registros y pila: x1[?], x2[?], x3[?], x4[?], x5[?], x6[?], x7[?], x8[?]
-; edi = x1
-; esi = x2
-; edx = x3
-; ecx = x4
-; r8d = x5
-; r9d = x6
-; rbp + 16 = x7
-; rbp + 24 = x8
+; edi <-- x1
+; esi <-- x2
+; edx <-- x3
+; ecx <-- x4
+; r8d <-- x5
+; r9d <-- x6
+; [rbp + 16] <-- x7
+; [rbp + 24] <-- x8
 ; x1 - x2 + x3 - x4 + x5 - x6 + x7 - x8
 alternate_sum_8:
 	;prologo
@@ -149,25 +149,26 @@ product_2_f:
 ;registros y pila: destination[rdi], x1[?], f1[?], x2[?], f2[?], x3[?], f3[?], x4[?], f4[?]
 ;	, x5[?], f5[?], x6[?], f6[?], x7[?], f7[?], x8[?], f8[?],
 ;	, x9[?], f9[?]
-; edi = destination
-; xmm0 = f1
-; esi = x1
-; xmm1 = f2
-; edx = x2
-; xmm2 = f3
-; ecx = x3
-; xmm3 = f4
-; r8d = x4
-; xmm4 = f5
-; r9d = x5
-; xmm5 = f6
-; rbp + 16 = x6
-; xmm6 = f7
-; rbp + 24 = x7
-; xmm7 = f8
-; rbp + 32 = x8
-; rbp + 40 = x9
-; rbp + 48 = f9
+; [NOTE]:
+; edi   <-- destination
+; xmm0  <-- f1
+; esi   <-- x1
+; xmm1  <-- f2
+; edx   <-- x2
+; xmm2  <-- f3
+; ecx   <-- x3
+; xmm3  <-- f4
+; r8d   <-- x4
+; xmm4  <-- f5
+; r9d   <-- x5
+; xmm5  <-- f6
+; [rbp + 16] <-- x6
+; xmm6  <-- f7
+; [rbp + 24] <-- x7
+; xmm7  <-- f8
+; [rbp + 32] <-- x8
+; [rbp + 40] <-- x9
+; [rbp + 48] <-- f9
 product_9_f:
 	;prologo
 	push rbp
@@ -201,8 +202,8 @@ product_9_f:
     mulsd xmm0, xmm8
     ; convertimos los enteros en doubles y los multiplicamos por xmm0.
 	; COMPLETAR
-    cvtsi2sd xmm1, esi 
-    cvtsi2sd xmm2, edx 
+    cvtsi2sd xmm1, esi
+    cvtsi2sd xmm2, edx
     cvtsi2sd xmm3, ecx
     cvtsi2sd xmm4, r8d
     cvtsi2sd xmm5, r9d
