@@ -30,16 +30,17 @@ strNCmp:
     push rbp
     mov rbp, rsp        ; rdi = a
     sub rsp, 16         ; rsi = b
-    lea ecx, [edx + 1]  ; ecx = len + 1
     xor eax, eax
+    lea ecx, [edx + 1]  ; ecx = len + 1
     cld                 ; limpio flag de dirección
     repe cmpsb          ; temp = 0;
-    mov eax, 0          ; for(int i = 0; i < ecx && temp == 0; i++)
-    jz .return          ;   temp = rsi[i] - rdi[i]
-    mov eax, -1         ; if(temp == 0) return 0;
-    js .return          ; if(temp < 0) return 1;
-    mov eax, 1          ; if(temp > 0) return -1;
-    .return:        
+                        ; for(int i = 0; i < ecx && temp == 0; i++)
+    seta dil            ;   temp = cmp(rsi[i], rdi[i])
+    setb sil            ; if(temp == 0) return 0;        // equal
+    add al, dil         ; if(rsi[i] > rdi[i]) return 1;  // above
+    sub al, sil         ; if(rsi[i] < rdi[i]) return -1; // below
+    movsx eax, al
+
     mov rsp, rbp        ; restauro stack
     pop rbp
     ret
