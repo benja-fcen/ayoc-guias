@@ -33,10 +33,10 @@ global cantidad_total_de_elementos_packed
 cantidad_total_de_elementos:
     push rbp
     mov rbp, rsp
-    mov rsi, [rdi + LISTA_OFFSET_HEAD]
     xor rax, rax
+    mov rsi, [rdi + LISTA_OFFSET_HEAD]
     .while:
-       add rax, [rsi + NODO_OFFSET_LONGITUD] 
+       add eax, [rsi + NODO_OFFSET_LONGITUD]
        mov rsi, [rsi + NODO_OFFSET_NEXT]
     test rsi, rsi
     jnz .while
@@ -51,7 +51,7 @@ cantidad_total_de_elementos_packed:
     mov rsi, [rdi + PACKED_LISTA_OFFSET_HEAD]
     xor rax, rax
     .while:
-       add rax, [rsi + PACKED_NODO_OFFSET_LONGITUD] 
+       add eax, [rsi + PACKED_NODO_OFFSET_LONGITUD] 
        mov rsi, [rsi + PACKED_NODO_OFFSET_NEXT]
     test rsi, rsi
     jnz .while
