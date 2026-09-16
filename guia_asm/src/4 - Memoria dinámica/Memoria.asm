@@ -50,7 +50,7 @@ strNCmp:
 strCmp:
 	push rbp
     mov rbp, rsp 
-    sub rsp, 24
+    sub rsp, 32
     mov [rbp - 8], rdi
     mov [rbp - 16], rsi
     call strLen         ; eax = strLen(a)
