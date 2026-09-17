@@ -20,15 +20,15 @@ global strLen
 ; int32_t strCmp(char* a, char* b, int len)
 strNCmp:
   push rbp
-
   mov rbp, rsp        ; rdi = a, rsi = b
+
   xor eax, eax        ; res = 0
   lea ecx, [edx + 1]  ; ecx = len + 1
   cld                 ; limpio flag de dirección
   repe cmpsb          ; temp = 0;
                       ; for(int i = 0; i < ecx && temp == 0; i++)
   seta dil            ;   temp = cmp(rsi[i], rdi[i])
-  setb sil            ; if(temp == 0) return 0;        // equal
+  setb sil            ; if(rsi[i] == rdi[i]) return 0; // equal
   add al, dil         ; if(rsi[i] > rdi[i]) return 1;  // above
   sub al, sil         ; if(rsi[i] < rdi[i]) return -1; // below
   movsx eax, al
@@ -69,8 +69,8 @@ strClone:
   inc eax
   mov [rbp - 16], eax ; [rbp - 16] = strLen(a)
   mov edi, eax
-  call malloc         ; char *rax = malloc(sizeof(strLen(a)))
-  mov rdi, rax        ; char *rdi = ret
+  call malloc         ; char *rax = malloc(strLen(a))
+  mov rdi, rax        ; char *rdi = rax
   mov rsi, [rbp - 8]  ; char *rsi = a
   mov ecx, [rbp - 16] ; int ecx = strLen(a)
   cld                 ; Limpiamos flag de direccion
@@ -115,7 +115,7 @@ strLen:
   repne scasb
   sub rdi, rsi
   lea rax, [rdi - 1]
-  
+
   mov rsp, rbp
   pop rbp
 	ret
