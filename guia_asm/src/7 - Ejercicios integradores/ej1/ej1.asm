@@ -65,32 +65,33 @@ es_indice_ordenado:
 	; r/m64 = comparador_t comparador
 	push rbp
 	mov rbp, rsp
-	sub rsp, 64
-	dec dx
-	mov byte [rbp - 8], 1 ; res
-	mov word [rbp - 16], 0; iterador
-	mov qword [rbp - 24], rdi 	; inventario
-	mov qword [rbp - 32], rsi 	; indice
-	mov word [rbp - 48], dx		; tamanio
-	mov qword [rbp - 64], rcx 	; comparador
+	sub rsp, 8
+  push r12
+  push r13
+	push r14
+
+	mov r12, rdi                ; inventario
+	mov r13, rsi                ; indice
+	mov [rbp - 8], dx           ; tamanio
+	mov r14, rcx                ; comparador
 	jmp .check
 	.f0:
-		mov rax, [rbp - 24] ; inventario
-		mov rsi, [rbp - 32] ; indice
-		movzx rdx, word [rbp - 16]  ; i
-		movzx rcx, word [rsi + 2 * rdx] ; indice[i]
-		mov rdi, [rax + 8 * rcx]; inventario[indice[i]]
-		movzx rcx, word [rsi + 2 * rdx + 2] ; indice[i + 1]
-		mov rsi, [rax + 8 * rcx] ; inventario[indice[i + 1]]
-		mov rdx, [rbp - 64]
-		call rdx
-		and [rbp - 8], al
-		inc word [rbp - 16]	
+		movzx rdi, word [r13]     ; rdi = indice[i]
+    movzx rsi, word [r13 + 2] ; rsi = indice[i + 1]
+		mov rdi, [r12 + 8 * rdi]  ; inventario[indice[i]]
+		mov rsi, [r12 + 8 * rsi]  ; inventario[indice[i + 1]]
+		call r14
+		test al, al
+    jz .return
+    add r13, 2
 	.check:
-		mov dx, [rbp - 48]
-		cmp [rbp - 16], dx
-		jne .f0
-	mov al, [rbp - 8]
+		dec word [rbp - 8]
+		jnz .f0
+
+  .return:
+  pop r14
+  pop r13
+  pop r12
 	mov rsp, rbp
 	pop rbp
 	ret
