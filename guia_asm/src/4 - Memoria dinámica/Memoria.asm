@@ -49,17 +49,12 @@ strNCmp:
 ; int32_t strCmp(char* a, char* b)
 strCmp:
 	push rbp
-    mov rbp, rsp 
-    sub rsp, 32
+    mov rbp, rsp
+    sub rsp, 16
     mov [rbp - 8], rdi
     mov [rbp - 16], rsi
     call strLen         ; eax = strLen(a)
-    mov [rbp - 24], eax ; [rbp - 24] = strlen(a)
-    mov rdi, [rbp - 16] 
-    call strLen         ; eax = strlen(b)
-    mov edx, [rbp - 24] ; edx = strlen(a)
-    cmp eax, edx        
-    cmovb edx, eax      ; edx = strlen(b) < strlen(a) ? strlen(b) : strlen(a)
+    mov edx, eax
     mov rdi, [rbp - 8]  ; rdi = a
     mov rsi, [rbp - 16] ; rsi = b
     call strNCmp        ; eax = strNCmp(a, b, edx)
