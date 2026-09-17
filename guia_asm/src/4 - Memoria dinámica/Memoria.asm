@@ -27,70 +27,76 @@ min:
 ; ** String **
 ; int32_t strCmp(char* a, char* b, int len)
 strNCmp:
-    push rbp
-    mov rbp, rsp        ; rdi = a, rsi = b
-    xor eax, eax        ; res = 0
-    lea ecx, [edx + 1]  ; ecx = len + 1
-    cld                 ; limpio flag de dirección
-    repe cmpsb          ; temp = 0;
-                        ; for(int i = 0; i < ecx && temp == 0; i++)
-    seta dil            ;   temp = cmp(rsi[i], rdi[i])
-    setb sil            ; if(temp == 0) return 0;        // equal
-    add al, dil         ; if(rsi[i] > rdi[i]) return 1;  // above
-    sub al, sil         ; if(rsi[i] < rdi[i]) return -1; // below
-    movsx eax, al
+  push rbp
 
-    mov rsp, rbp        ; restauro stack
-    pop rbp
-    ret
+  mov rbp, rsp        ; rdi = a, rsi = b
+  xor eax, eax        ; res = 0
+  lea ecx, [edx + 1]  ; ecx = len + 1
+  cld                 ; limpio flag de dirección
+  repe cmpsb          ; temp = 0;
+                      ; for(int i = 0; i < ecx && temp == 0; i++)
+  seta dil            ;   temp = cmp(rsi[i], rdi[i])
+  setb sil            ; if(temp == 0) return 0;        // equal
+  add al, dil         ; if(rsi[i] > rdi[i]) return 1;  // above
+  sub al, sil         ; if(rsi[i] < rdi[i]) return -1; // below
+  movsx eax, al
+
+  mov rsp, rbp        ; restauro stack
+  pop rbp
+  ret
 
 
 ; int32_t strCmp(char* a, char* b)
 strCmp:
 	push rbp
-    mov rbp, rsp
-    sub rsp, 16
-    mov [rbp - 8], rdi
-    mov [rbp - 16], rsi
-    call strLen         ; eax = strLen(a)
-    mov edx, eax        ; edx = eax
-    mov rdi, [rbp - 8]  ; rdi = a
-    mov rsi, [rbp - 16] ; rsi = b
-    call strNCmp        ; eax = strNCmp(a, b, strLen(a))
-    mov rsp, rbp        ; restauro stack
-    pop rbp
-    ret
+  mov rbp, rsp
+
+  sub rsp, 16
+  mov [rbp - 8], rdi
+  mov [rbp - 16], rsi
+  call strLen         ; eax = strLen(a)
+  mov edx, eax        ; edx = eax
+  mov rdi, [rbp - 8]  ; rdi = a
+  mov rsi, [rbp - 16] ; rsi = b
+  call strNCmp        ; eax = strNCmp(a, b, strLen(a))
+  mov rsp, rbp        ; restauro stack
+
+  pop rbp
+  ret
 
 
 
 ; char* strClone(char* a)
 strClone:
-    push rbp
-    mov rbp, rsp
-    sub rsp, 16
-    mov [rbp - 8], rdi  ; [rbp - 8] = a
-    call strLen
-    inc eax
-    mov [rbp - 16], eax ; [rbp - 16] = strLen(a)
-    mov edi, eax
-    call malloc         ; char *rax = malloc(sizeof(strLen(a)))
-    mov rdi, rax        ; char *rdi = ret
-    mov rsi, [rbp - 8]  ; char *rsi = a
-    mov ecx, [rbp - 16] ; int ecx = strLen(a)
-    cld                 ; Limpiamos flag de direccion
-    repe movsb          ; for(int i = 0; i < ecx; i++)
-                        ;   rdi[i] = rsi[i]
-    mov rsp, rbp        ; restauro stack
-    pop rbp
+  push rbp
+  mov rbp, rsp
+
+  sub rsp, 16
+  mov [rbp - 8], rdi  ; [rbp - 8] = a
+  call strLen
+  inc eax
+  mov [rbp - 16], eax ; [rbp - 16] = strLen(a)
+  mov edi, eax
+  call malloc         ; char *rax = malloc(sizeof(strLen(a)))
+  mov rdi, rax        ; char *rdi = ret
+  mov rsi, [rbp - 8]  ; char *rsi = a
+  mov ecx, [rbp - 16] ; int ecx = strLen(a)
+  cld                 ; Limpiamos flag de direccion
+  repe movsb          ; for(int i = 0; i < ecx; i++)
+                      ;   rdi[i] = rsi[i]
+  mov rsp, rbp        ; restauro stack
+  pop rbp
 	ret
 
 ; void strDelete(char* a)
 strDelete:
-    push rbp
-    mov rbp, rsp
-    call free
-    mov rsp, rbp
-    pop rbp
+  push rbp
+  mov rbp, rsp
+
+  call free
+  mov rsp, rbp
+
+  pop rbp
 	ret
 
 ; void strPrint(char* a, FILE* pFile)
