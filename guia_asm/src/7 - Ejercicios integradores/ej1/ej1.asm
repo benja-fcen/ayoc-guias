@@ -9,6 +9,9 @@ FALSE EQU 0
 ; Marca un ejercicio como hecho
 TRUE  EQU 1
 
+PTR_SIZE EQU 8
+UINT16_SIZE EQU 2
+
 ; Marca el ejercicio 1A como hecho (`true`) o pendiente (`false`).
 ;
 ; Funciones a implementar:
@@ -70,20 +73,20 @@ es_indice_ordenado:
   push r13
 	push r14
 
-	mov r12, rdi                ; inventario
-	mov r13, rsi                ; indice
-	mov [rbp - 8], dx           ; tamanio
-	mov r14, rcx                ; comparador
+	mov r12, rdi                          ; inventario
+	mov r13, rsi                          ; indice
+	mov [rbp - 8], dx                     ; tamanio
+	mov r14, rcx                          ; comparador
 	jmp .check
 	.f0:
-		movzx rdi, word [r13]     ; rdi = indice[i]
-    movzx rsi, word [r13 + 2] ; rsi = indice[i + 1]
-		mov rdi, [r12 + 8 * rdi]  ; inventario[indice[i]]
-		mov rsi, [r12 + 8 * rsi]  ; inventario[indice[i + 1]]
+		movzx rdi, word [r13]               ; rdi = indice[i]
+    movzx rsi, word [r13 + UINT16_SIZE] ; rsi = indice[i + 1]
+		mov rdi, [r12 + rdi * PTR_SIZE]     ; inventario[indice[i]]
+		mov rsi, [r12 + rsi * PTR_SIZE]     ; inventario[indice[i + 1]]
 		call r14
 		test al, al
     jz .return
-    add r13, 2
+    add r13, UINT16_SIZE
 	.check:
 		dec word [rbp - 8]
 		jnz .f0
@@ -127,26 +130,27 @@ indice_a_inventario:
 	; r/m16 = uint16_t  tamanio
   push rbp
   mov rbp, rsp
-  sub rsp, 64
-  mov [rbp - 8], rdi
-  mov [rbp - 16], rsi
-  movzx rdx, dx
-  mov [rbp - 32], rdx
+  sub rsp, 8
+  push rdi
+  push rsi
   
   movzx rdi, dx
+  push rdi
+  lea rdi, [rdi * PTR_SIZE]
   call malloc                       ; rax = resultado
-  mov rcx, 0                        ; i
-  mov rdi, [rbp - 8]                ; inventario
-  mov rsi, [rbp - 16]               ; indice
-  jmp .c0
+  pop rcx
+  pop rsi
+  pop rdi
+  jrcxz .return
+  mov r8, rax
   .f0:
-    movzx rdx, WORD [rsi + 2 * rcx] ; indice[i]
-    mov rdx, [rdi + 8 * rdx]        ; inventario[indice[i]]
-    mov [rax + 8 * rcx], rdx        ; resultado[i] = inventario[indice[i]]
-    inc rcx
-  .c0:
-    cmp rcx, [rbp - 32]
-    jb .f0
+    movzx rdx, word [rsi]           ; indice[i]
+    mov rdx, [rdi + rdx * PTR_SIZE] ; inventario[indice[i]]
+    mov [r8], rdx                   ; resultado[i] = inventario[indice[i]]
+    add rsi, UINT16_SIZE
+    add r8, PTR_SIZE
+    loop .f0
+  .return:
   mov rsp, rbp
   pop rbp
 	ret
