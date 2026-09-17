@@ -93,6 +93,14 @@ strDelete:
 
 ; void strPrint(char* a, FILE* pFile)
 strPrint:
+  push rbp
+  mov rbp, rsp
+
+  xchg rdi, rsi
+  call fprintf
+
+  mov rsp, rbp
+  pop rbp
 	ret
 
 ; uint32_t strLen(char* a)
