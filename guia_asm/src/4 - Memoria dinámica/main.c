@@ -9,5 +9,6 @@
 
 int main() {
 	/* Acá pueden realizar sus propias pruebas */
+  strPrint("Hello world\n", stdout);
 	return 0;
 }
