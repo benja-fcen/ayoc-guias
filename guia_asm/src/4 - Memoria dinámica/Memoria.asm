@@ -16,14 +16,6 @@ global strDelete
 global strPrint
 global strLen
 
-; int32_t min(int a, int b)
-min:
-    mov eax, esi
-    cmp edi, esi
-    cmovb eax, edi
-    ret
-
-
 ; ** String **
 ; int32_t strCmp(char* a, char* b, int len)
 strNCmp:
