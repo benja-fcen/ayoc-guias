@@ -28,9 +28,8 @@ min:
 ; int32_t strCmp(char* a, char* b, int len)
 strNCmp:
     push rbp
-    mov rbp, rsp        ; rdi = a
-    sub rsp, 16         ; rsi = b
-    xor eax, eax
+    mov rbp, rsp        ; rdi = a, rsi = b
+    xor eax, eax        ; res = 0
     lea ecx, [edx + 1]  ; ecx = len + 1
     cld                 ; limpio flag de dirección
     repe cmpsb          ; temp = 0;
@@ -54,10 +53,10 @@ strCmp:
     mov [rbp - 8], rdi
     mov [rbp - 16], rsi
     call strLen         ; eax = strLen(a)
-    mov edx, eax
+    mov edx, eax        ; edx = eax
     mov rdi, [rbp - 8]  ; rdi = a
     mov rsi, [rbp - 16] ; rsi = b
-    call strNCmp        ; eax = strNCmp(a, b, edx)
+    call strNCmp        ; eax = strNCmp(a, b, strLen(a))
     mov rsp, rbp        ; restauro stack
     pop rbp
     ret
