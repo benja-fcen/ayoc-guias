@@ -99,16 +99,19 @@ strPrint:
 
 ; uint32_t strLen(char* a)
 strLen:
-    push rdi
-    mov eax, -1
-    xor rcx, rcx
-    .l0:
-        inc eax
-        mov dl, [rdi + rcx]
-        inc rcx
-        test dl, dl
-        jnz .l0
-    pop rdi
+  push rbp
+  mov rbp, rsp
+
+  mov rsi, rdi
+  mov rcx, -1
+  mov al, 0
+  cld
+  repne scasb
+  sub rdi, rsi
+  lea rax, [rdi - 1]
+  
+  mov rsp, rbp
+  pop rbp
 	ret
 
 
