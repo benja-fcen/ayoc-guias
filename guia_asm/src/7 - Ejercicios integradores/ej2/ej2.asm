@@ -3,6 +3,10 @@ extern free
 extern memcpy
 section .rodata
 ; Acá se pueden poner todas las máscaras y datos que necesiten para el ejercicio
+NULL EQU 0
+PTR_SIZE EQU 8
+MAPA_SIZE EQU 255 * 255
+
 
 section .text
 ; Marca un ejercicio como aún no completado (esto hace que no corran sus tests)
@@ -49,39 +53,39 @@ optimizar:
 	; r/m64 = uint32_t*        fun_hash(attackunit_t*)
   push rbp
   mov rbp, rsp
-  sub rsp, 48
-  mov [rbp - 8], rdi                        ; mapa
-  mov [rbp - 16], rsi                       ; compartida
-  mov [rbp - 24], rdx                       ; fun_hash
-  mov qword [rbp - 32], 0                   ; i
-  ;mov dword [rbp - 40], 0                  ; fun_hash(compartida)
-  mov rdi, rsi                              ; rdi = compartida
-  call [rbp - 24]                           ; fun_hash(rdi)
-  mov [rbp - 40], eax                       ; eax = fun_hash(compartida)
-  .l0:                                      ; for(int i = 0; i < 255 * 255; i--)
-    mov rcx, [rbp - 32]                     ; i
-    mov rdi, [rbp - 8]                      ; mapa
-    mov rdi, [rdi + 8 * rcx]                ; rdi = cUnit = mapa[i]
-    test rdi, rdi                           ; if(cUnit == NULL)
-    jz .continue                            ;   continue;
-    call [rbp - 24]                         ;
-    cmp eax, [rbp - 40]                     ; if(fun_hash(cUnit) != fun_hash(compartida))
-    jne .continue                           ;   continue;
-    mov rcx, [rbp - 32]                     ; i
-    mov r8, [rbp - 8]                       ; mapa
-    mov rdi, [r8 + 8 * rcx]                 ; cUnit = mapa[i]
-    mov rsi, [rbp - 16]                     ; compartida
+  sub rsp, 16
 
-    inc byte [rsi + ATTACKUNIT_REFERENCES]  ; compartida->references++
+  push r12
+  push r13
+
+  mov r12, rdi                              ; mapa
+  mov r13, rsi                              ; compartida
+  mov [rbp - 8], rdx                       ; fun_hash
+  mov dword [rbp - 12], 255 * 255           ; i
+  mov rdi, rsi                              ; rdi = compartida
+  call [rbp - 8]                           ; fun_hash(rdi)
+  mov [rbp - 16], eax                       ; eax = fun_hash(compartida)
+  .l0:                                      ; for(int i = 0; i < 255 * 255; i--)
+    cmp qword [r12], NULL
+    je .continue                            ;   continue;
+    mov rdi, [r12]
+    call [rbp - 8]                         ;
+    cmp eax, [rbp - 16]                     ; if(fun_hash(cUnit) != fun_hash(compartida))
+    jne .continue                           ;   continue;
+    mov rdi, [r12]                          ; cUnit = mapa[i]
+
+    mov [r12], r13                          ; mapa[i] = compartida
+    inc byte [r13 + ATTACKUNIT_REFERENCES]  ; compartida->references++
     dec byte [rdi + ATTACKUNIT_REFERENCES]  ; cUnit->references--
-    mov [r8 + 8 * rcx], rsi                 ; mapa[i] = compartida
     jnz .continue                           ; cUnit->references ? continue : free(cUnit)
     call free
     .continue:
-  .c0:
-    inc QWORD [rbp - 32]
-    cmp QWORD [rbp - 32], 255 * 255
-    jb .l0
+    add r12, PTR_SIZE
+    dec dword [rbp - 12]
+    jnz .l0
+
+  pop r13
+  pop r12
   mov rsp, rbp
   pop rbp
 	ret
