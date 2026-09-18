@@ -27,7 +27,7 @@ bool EJERCICIO_1B_HECHO = true;
 bool es_indice_ordenado(item_t **inventario, uint16_t *indice, uint16_t tamanio,
                         comparador_t comparador) {
   bool res = true;
-  for (uint16_t i = 0; i < tamanio - 1; i++) {
+  for (uint16_t i = 0; res && i < tamanio - 1; i++) {
     res &= comparador(inventario[indice[i]], inventario[indice[i + 1]]);
   }
   return res;
