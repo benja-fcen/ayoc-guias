@@ -51,6 +51,7 @@ optimizar:
 	; r/m64 = mapa_t           mapa
 	; r/m64 = attackunit_t*    compartida
 	; r/m64 = uint32_t*        fun_hash(attackunit_t*)
+  ; prologo, armamos el stack frame
   push rbp
   mov rbp, rsp
   sub rsp, 16
@@ -60,32 +61,34 @@ optimizar:
 
   mov r12, rdi                              ; mapa
   mov r13, rsi                              ; compartida
-  mov [rbp - 8], rdx                       ; fun_hash
-  mov dword [rbp - 12], 255 * 255           ; i
+  mov [rbp - 8], rdx                        ; fun_hash
+  mov dword [rbp - 12], MAPA_SIZE           ; i
   mov rdi, rsi                              ; rdi = compartida
-  call [rbp - 8]                           ; fun_hash(rdi)
+  call [rbp - 8]                            ; fun_hash(rdi)
   mov [rbp - 16], eax                       ; eax = fun_hash(compartida)
-  .l0:                                      ; for(int i = 0; i < 255 * 255; i--)
-    cmp qword [r12], NULL
+  .for:                                     ; for(int i = 0; i < 255 * 255; i--)
+    cmp qword [r12], NULL                   ; if(mapa[i] == NULL)
     je .continue                            ;   continue;
     mov rdi, [r12]
-    call [rbp - 8]                         ;
-    cmp eax, [rbp - 16]                     ; if(fun_hash(cUnit) != fun_hash(compartida))
+    call [rbp - 8]                          ; eax = fun_hash(mapa[i])
+    cmp eax, [rbp - 16]                     ; if(fun_hash(mapa[i]) != fun_hash(compartida))
     jne .continue                           ;   continue;
     mov rdi, [r12]                          ; cUnit = mapa[i]
-
     mov [r12], r13                          ; mapa[i] = compartida
     inc byte [r13 + ATTACKUNIT_REFERENCES]  ; compartida->references++
     dec byte [rdi + ATTACKUNIT_REFERENCES]  ; cUnit->references--
-    jnz .continue                           ; cUnit->references ? continue : free(cUnit)
-    call free
+    jnz .continue                           ; if(cUnit->references == 0)
+    call free                               ;   free(cUnit)
     .continue:
+    ; incremento puntero y decremento contador
     add r12, PTR_SIZE
     dec dword [rbp - 12]
-    jnz .l0
+    jnz .for
 
   pop r13
   pop r12
+
+  ; epilogo
   mov rsp, rbp
   pop rbp
 	ret
