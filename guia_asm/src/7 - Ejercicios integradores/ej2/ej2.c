@@ -36,15 +36,14 @@ void optimizar(mapa_t mapa, attackunit_t *compartida,
   for (int i = 0; i < 255; i++)
     for (int j = 0; j < 255; j++) {
       attackunit_t *cUnit = mapa[i][j];
-      if (cUnit) {
-        if (fun_hash(cUnit) == fun_hash(compartida)) {
-          mapa[i][j] = compartida;
-          compartida->references++;
-          cUnit->references--;
-        }
-        if (cUnit->references == 0)
-          free(cUnit);
+      if(!cUnit) continue;
+      if (fun_hash(cUnit) == fun_hash(compartida)) {
+        mapa[i][j] = compartida;
+        compartida->references++;
+        cUnit->references--;
       }
+      if (cUnit->references == 0)
+        free(cUnit);
     }
 }
 

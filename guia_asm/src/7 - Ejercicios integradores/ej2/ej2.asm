@@ -97,33 +97,37 @@ global contarCombustibleAsignado
 contarCombustibleAsignado:
 	; r/m64 = mapa_t           mapa
 	; r/m64 = uint16_t*        fun_combustible(char*)
+
+  ; prologo
   push rbp
   mov rbp, rsp
-  sub rsp, 32
-  mov [rbp - 8], rdi                              ; mapa
-  mov [rbp - 16], rsi                             ; fun
-  mov qword [rbp - 24], 0                         ; i
-  mov dword [rbp - 32], 0                         ; total
-  .l0:                                            ; for(int i = 0; i < 255 * 255; i++)
-    mov rdi, [rbp - 8]                            ; mapa
-    ;mov rsi, [rbp - 16]                          ; fun
-    mov rdx, [rbp - 24]                           ; i
-    mov rdi, [rdi + 8 * rdx]                      ; mapa[i]
-    test rdi, rdi                                 ; if(mapa[i] == NULL) continue
-    jz .continue                                  ;   continue
-    ;mov rdi, [rdi]                               ; rdi = cUnit->clase
-    movzx esi, word [rdi + ATTACKUNIT_COMBUSTIBLE]; esi = cUnit->combustible
-    add [rbp - 32], esi                           ; total += cUnit->combustible
-    mov rax, [rdi + ATTACKUNIT_CLASE]             ; rax = cUnit->clase
-    call [rbp - 16]                               ; fun_combustible(cUnit->clase)
-    movzx eax, ax                                 ;
-    sub [rbp - 32], eax                           ; total -= fun_combustible(rdi->clase)
-  .continue:
-    inc qword [rbp - 24]
-    cmp qword [rbp - 24], 255 * 255
-    jb .l0
+  sub rsp, 24
 
-  mov eax, [rbp - 32]
+  push r12
+
+  mov r12, rdi                                    ; mapa
+  mov [rbp - 8], rsi                              ; fun
+  mov dword [rbp - 12], MAPA_SIZE                 ; i
+  mov dword [rbp - 16], 0                         ; total
+  .for:                                           ; for(int i = 0; i < 255 * 255; i++)
+    cmp qword [r12], NULL                         ; if(mapa[i] == NULL) continue
+    je .continue                                  ;   continue
+    mov rax, [r12]                                ; cUnit = mapa[i]
+    movzx esi, word [rax + ATTACKUNIT_COMBUSTIBLE]; esi = cUnit->combustible
+    add [rbp - 16], esi                           ; total += cUnit->combustible
+    lea rdi, [rax + ATTACKUNIT_CLASE]             ;
+    call [rbp - 8]                                ; fun_combustible(cUnit->clase)
+    movzx eax, ax                                 ; eax <- zeroExtend(ax)
+    sub [rbp - 16], eax                           ; total -= fun_combustible(rdi->clase)
+  .continue:
+    ; incremento puntero y decremento contador
+    add r12, PTR_SIZE
+    dec dword [rbp - 12]
+    jnz .for
+
+  pop r12
+  ; epilogo
+  mov eax, [rbp - 16]
   mov rsp, rbp
   pop rbp
 	ret
