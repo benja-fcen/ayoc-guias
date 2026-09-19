@@ -138,6 +138,7 @@ modificarUnidad:
 	; r/m8  = uint8_t          x
 	; r/m8  = uint8_t          y
 	; r/m64 = void*            fun_modificar(attackunit_t*)
+  ; prologo, armo stack frame
   push rbp
   mov rbp, rsp
   sub rsp, 16
@@ -145,10 +146,9 @@ modificarUnidad:
   push r12
   push r13
 
-  movzx rsi, sil
   movzx rdx, dl
 
-  mov rax, rsi                              ; rax = x
+  movzx rax, sil                            ; rax = x
   shl rax, 8                                ; rax = x * 256
   sub rax, rsi                              ; rax = rax - x = x * 255
   add rax, rdx                              ; rax = x * 255 + y
@@ -180,6 +180,7 @@ modificarUnidad:
   .return:
   pop r13
   pop r12
+  ; epilogo
   mov rsp, rbp
   pop rbp
 	ret
