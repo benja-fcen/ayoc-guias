@@ -140,46 +140,46 @@ modificarUnidad:
 	; r/m64 = void*            fun_modificar(attackunit_t*)
   push rbp
   mov rbp, rsp
-  sub rsp, 48
+  sub rsp, 16
+
+  push r12
+  push r13
 
   movzx rsi, sil
-  mov rax, rsi                              ; rax = x
-  sal rax, 8                                ; rax = x * 256
-  sub rax, rsi                              ; rax = rax - x = x * 255
   movzx rdx, dl
-  add rax, rdx                              ; rax = x * 255 + y
-  mov [rbp - 8], rdi                        ; mapa
-  mov [rbp - 16], rax                       ; x * 255 + y
-  mov [rbp - 24], rcx                       ; fun_modificar
-  ;mov qword [rbp - 32], 0                  ; attackunit_t *cUnit
-  ;mov qword [rbp - 40], 0                  ; attackunit_t *nUnit
 
-  mov rdi, [rdi + 8 * rax]                  ; rdi = cUnit = mapa[x][y]
-  mov [rbp - 32], rdi
-  test rdi, rdi                             ; if(!cUnit)
-  jz .return                                ;   return;
-  mov sil, [rdi + ATTACKUNIT_REFERENCES]    ;
-  cmp sil, 1                                ; if(cUnit->references == 1)
-  je .modificar                             ;   fun_modificar(cUnit);
+  mov rax, rsi                              ; rax = x
+  shl rax, 8                                ; rax = x * 256
+  sub rax, rsi                              ; rax = rax - x = x * 255
+  add rax, rdx                              ; rax = x * 255 + y
+
+  mov [rbp - 8], rcx                        ; fun_modificar
+
+  lea r12, [rdi + 8 * rax]                  ; r12 = &mapa[x][y]
+  cmp qword [r12], NULL                     ; if(mapa[x][y] == NULL)
+  je .return                                ;   return;
+
+  mov rdi, [r12]                            ; rdi = mapa[x][y]
+  cmp byte [rdi + ATTACKUNIT_REFERENCES], 1 ; if(rdi->references == 1)
+  je .modificar                             ;   fun_modificar(rdi);
                                             ; else {...
+  mov r13, rdi                              ; r13 = mapa[x][y]
   mov rdi, ATTACKUNIT_SIZE                  ; rdi = sizeof(attackunit_t)
   call malloc                               ; malloc(sizeof(attackunit_t))
-  mov [rbp - 40], rax                       ; nUnit = malloc(sizeof(attackunit_t))
   mov rdi, rax                              ; rdi = nUnit
-  mov rsi, [rbp - 32]                       ; rsi = cUnit
+  mov rsi, r13                              ; rsi = cUnit
   mov rdx, ATTACKUNIT_SIZE                  ; rdx = sizeof(attackunit_t)
-  call memcpy                               ; memcpy(rdi, rsi, sizeof(attackunit_t))
-  mov rdi, [rbp - 32]                       ; rdi = cUnit
+  call memcpy                               ; memcpy(nUnit, cUnit, sizeof(attackunit_t))
   mov byte [rax + ATTACKUNIT_REFERENCES], 1 ; nUnit->references = 1
-  sub byte [rdi + ATTACKUNIT_REFERENCES], 1 ; cUnit->references--
-  mov rsi, [rbp - 8]                        ; rsi = mapa
-  mov rdx, [rbp - 16]                       ; rdx = x * 255 + y
-  mov [rsi + 8 * rdx], rax                  ; mapa[x][y] = nUnit
+  dec byte [r13 + ATTACKUNIT_REFERENCES]    ; cUnit->references--
+  mov [r12], rax                            ; mapa[x][y] = nUnit
   mov rdi, rax                              ; rdi = nUnit
   .modificar:
-  call [rbp - 24]                           ; fun_modificar(rdi)
+  call [rbp - 8]                           ; fun_modificar(rdi)
 
   .return:
+  pop r13
+  pop r12
   mov rsp, rbp
   pop rbp
 	ret
